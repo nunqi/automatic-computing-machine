@@ -2,7 +2,6 @@ defmodule AutomaticComputingMachineWeb.Router do
   use AutomaticComputingMachineWeb, :router
 
   import AutomaticComputingMachineWeb.UserAuth
-  alias AutomaticComputingMachineWeb.UserAuthLive
 
   pipeline :browser do
     plug :accepts, ["html"]

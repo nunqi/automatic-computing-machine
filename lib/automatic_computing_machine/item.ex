@@ -58,7 +58,6 @@ defmodule AutomaticComputingMachine.Item do
     %Expense{}
     |> Expense.changeset(attrs)
     |> Repo.insert()
-    |> broadcast(:expense_created)
   end
 
   @doc """
@@ -77,7 +76,6 @@ defmodule AutomaticComputingMachine.Item do
     expense
     |> Expense.changeset(attrs)
     |> Repo.update()
-    |> broadcast(:expense_updated)
   end
 
   @doc """
@@ -158,7 +156,6 @@ defmodule AutomaticComputingMachine.Item do
     %Revenue{}
     |> Revenue.changeset(attrs)
     |> Repo.insert()
-    |> broadcast(:revenue_created)
   end
 
   @doc """
@@ -177,7 +174,6 @@ defmodule AutomaticComputingMachine.Item do
     revenue
     |> Revenue.changeset(attrs)
     |> Repo.update()
-    |> broadcast(:revenue_updated)
   end
 
   @doc """
@@ -207,15 +203,5 @@ defmodule AutomaticComputingMachine.Item do
   """
   def change_revenue(%Revenue{} = revenue, attrs \\ %{}) do
     Revenue.changeset(revenue, attrs)
-  end
-
-  def subscribe do
-    Phoenix.PubSub.subscribe(AutomaticComputingMachine.PubSub, "items")
-  end
-
-  defp broadcast({:error, _reason} = error, _event), do: error
-  defp broadcast({:ok, item}, event) do
-    Phoenix.PubSub.broadcast(AutomaticComputingMachine.PubSub, "items", {event, item})
-    {:ok, item}
   end
 end

@@ -7,7 +7,6 @@ defmodule AutomaticComputingMachineWeb.RevenueLive.Index do
 
   @impl true
   def mount(_params, %{"user_token" => user_token} = _session, socket) do
-    if connected?(socket), do: Item.subscribe()
     user = Accounts.get_user_by_session_token(user_token)
     {:ok,
       socket

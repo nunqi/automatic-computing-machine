@@ -7,7 +7,6 @@ defmodule AutomaticComputingMachineWeb.ExpenseLive.Index do
 
   @impl true
   def mount(_params, %{"user_token" => user_token} = _session, socket) do
-    if connected?(socket), do: Item.subscribe()
     user = Accounts.get_user_by_session_token(user_token)
     {:ok,
       socket
@@ -44,19 +43,6 @@ defmodule AutomaticComputingMachineWeb.ExpenseLive.Index do
     {:ok, _} = Item.delete_expense(expense)
 
     {:noreply, assign(socket, :expenses, list_expenses(socket.assigns.current_user.id))}
-  end
-
-  @impl true
-  def handle_info({:expense_created, expense}, socket) do
-    {:noreply, update(socket, :expenses, fn expenses -> [expense | expenses] end)}
-  end
-
-  def handle_info({:expense_updated, expense}, socket) do
-    {:noreply, update(socket, :expenses, fn expenses -> [expense | expenses] end)}
-  end
-
-  def handle_info({_event, expense}, socket) do
-    {:noreply, update(socket, :expenses, fn expenses -> [expense | expenses] end)}
   end
 
   defp list_expenses(user_id) do
