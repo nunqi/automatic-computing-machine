@@ -3,10 +3,16 @@ defmodule AutomaticComputingMachineWeb.RevenueLive.Index do
 
   alias AutomaticComputingMachine.Item
   alias AutomaticComputingMachine.Item.Revenue
+	alias AutomaticComputingMachine.Accounts
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, :revenues, list_revenues())}
+  def mount(_params, %{"user_token" => user_token} = _session, socket) do
+    if connected?(socket), do: Item.subscribe()
+    user = Accounts.get_user_by_session_token(user_token)
+    {:ok,
+      socket
+      |> assign(:revenues, list_revenues(user.id))
+      |> assign(:current_user, user)} #, temporary_assigns: [expenses: []]}
   end
 
   @impl true
@@ -23,7 +29,7 @@ defmodule AutomaticComputingMachineWeb.RevenueLive.Index do
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Revenue")
-    |> assign(:revenue, %Revenue{})
+    |> assign(:revenue, %Revenue{user_id: socket.assigns.current_user.id})
   end
 
   defp apply_action(socket, :index, _params) do
@@ -37,10 +43,10 @@ defmodule AutomaticComputingMachineWeb.RevenueLive.Index do
     revenue = Item.get_revenue!(id)
     {:ok, _} = Item.delete_revenue(revenue)
 
-    {:noreply, assign(socket, :revenues, list_revenues())}
+    {:noreply, assign(socket, :revenues, list_revenues(socket.assigns.current_user.id))}
   end
 
-  defp list_revenues do
-    Item.list_revenues()
+  defp list_revenues(user_id) do
+    Item.list_revenues(user_id)
   end
 end

@@ -10,6 +10,7 @@ defmodule AutomaticComputingMachineWeb.RevenueLive.FormComponent do
     {:ok,
      socket
      |> assign(assigns)
+     |> assign(:current_user_id, revenue.user_id)
      |> assign(:changeset, changeset)}
   end
 
@@ -24,7 +25,8 @@ defmodule AutomaticComputingMachineWeb.RevenueLive.FormComponent do
   end
 
   def handle_event("save", %{"revenue" => revenue_params}, socket) do
-    save_revenue(socket, socket.assigns.action, revenue_params)
+    new_revenue = Map.put(revenue_params, "user_id", socket.assigns.current_user_id)
+    save_revenue(socket, socket.assigns.action, new_revenue)
   end
 
   defp save_revenue(socket, :edit, revenue_params) do
