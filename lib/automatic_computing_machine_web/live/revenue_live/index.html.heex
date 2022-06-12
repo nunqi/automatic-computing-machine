@@ -1,0 +1,41 @@
+<h1>Listing Revenues</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <.modal return_to={Routes.revenue_index_path(@socket, :index)}>
+    <.live_component
+      module={AutomaticComputingMachineWeb.RevenueLive.FormComponent}
+      id={@revenue.id || :new}
+      title={@page_title}
+      action={@live_action}
+      revenue={@revenue}
+      return_to={Routes.revenue_index_path(@socket, :index)}
+    />
+  </.modal>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Value</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="revenues">
+    <%= for revenue <- @revenues do %>
+      <tr id={"revenue-#{revenue.id}"}>
+        <td><%= revenue.title %></td>
+        <td><%= revenue.value %></td>
+
+        <td>
+          <span><%= live_redirect "Show", to: Routes.revenue_show_path(@socket, :show, revenue) %></span>
+          <span><%= live_patch "Edit", to: Routes.revenue_index_path(@socket, :edit, revenue) %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: revenue.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "New Revenue", to: Routes.revenue_index_path(@socket, :new) %></span>

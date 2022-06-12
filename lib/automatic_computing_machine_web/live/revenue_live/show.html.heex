@@ -1,0 +1,31 @@
+<h1>Show Revenue</h1>
+
+<%= if @live_action in [:edit] do %>
+  <.modal return_to={Routes.revenue_show_path(@socket, :show, @revenue)}>
+    <.live_component
+      module={AutomaticComputingMachineWeb.RevenueLive.FormComponent}
+      id={@revenue.id}
+      title={@page_title}
+      action={@live_action}
+      revenue={@revenue}
+      return_to={Routes.revenue_show_path(@socket, :show, @revenue)}
+    />
+  </.modal>
+<% end %>
+
+<ul>
+
+  <li>
+    <strong>Title:</strong>
+    <%= @revenue.title %>
+  </li>
+
+  <li>
+    <strong>Value:</strong>
+    <%= @revenue.value %>
+  </li>
+
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.revenue_show_path(@socket, :edit, @revenue), class: "button" %></span> |
+<span><%= live_redirect "Back", to: Routes.revenue_index_path(@socket, :index) %></span>

@@ -1,6 +1,9 @@
 defmodule AutomaticComputingMachineWeb.Router do
   use AutomaticComputingMachineWeb, :router
 
+  import AutomaticComputingMachineWeb.UserAuth
+  alias AutomaticComputingMachineWeb.UserAuthLive
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,6 +11,7 @@ defmodule AutomaticComputingMachineWeb.Router do
     plug :put_root_layout, {AutomaticComputingMachineWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
   pipeline :api do
@@ -15,9 +19,25 @@ defmodule AutomaticComputingMachineWeb.Router do
   end
 
   scope "/", AutomaticComputingMachineWeb do
-    pipe_through :browser
+    pipe_through [:browser, :require_authenticated_user]
 
     get "/", PageController, :index
+
+    # Expenses routes
+    live "/expenses", ExpenseLive.Index, :index
+    live "/expenses/new", ExpenseLive.Index, :new
+    live "/expenses/:id/edit", ExpenseLive.Index, :edit
+
+    live "/expenses/:id", ExpenseLive.Show, :show
+    live "/expenses/:id/show/edit", ExpenseLive.Show, :edit
+
+    # Revenues routes
+    live "/revenues", RevenueLive.Index, :index
+    live "/revenues/new", RevenueLive.Index, :new
+    live "/revenues/:id/edit", RevenueLive.Index, :edit
+
+    live "/revenues/:id", RevenueLive.Show, :show
+    live "/revenues/:id/show/edit", RevenueLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
@@ -52,5 +72,38 @@ defmodule AutomaticComputingMachineWeb.Router do
 
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+  end
+
+  ## Authentication routes
+
+  scope "/", AutomaticComputingMachineWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    get "/users/register", UserRegistrationController, :new
+    post "/users/register", UserRegistrationController, :create
+    get "/users/log_in", UserSessionController, :new
+    post "/users/log_in", UserSessionController, :create
+    get "/users/reset_password", UserResetPasswordController, :new
+    post "/users/reset_password", UserResetPasswordController, :create
+    get "/users/reset_password/:token", UserResetPasswordController, :edit
+    put "/users/reset_password/:token", UserResetPasswordController, :update
+  end
+
+  scope "/", AutomaticComputingMachineWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/users/settings", UserSettingsController, :edit
+    put "/users/settings", UserSettingsController, :update
+    get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+  end
+
+  scope "/", AutomaticComputingMachineWeb do
+    pipe_through [:browser]
+
+    delete "/users/log_out", UserSessionController, :delete
+    get "/users/confirm", UserConfirmationController, :new
+    post "/users/confirm", UserConfirmationController, :create
+    get "/users/confirm/:token", UserConfirmationController, :edit
+    post "/users/confirm/:token", UserConfirmationController, :update
   end
 end
